@@ -1,4 +1,7 @@
 .venv
+inventory
 secret.txt
 vaultfile.yaml
-inventory
+group_vars/cluster*.yaml
+*-bundle*.yaml
+.DS_store

@@ -1,0 +1,6 @@
+---
+- name: Sysdig Installation
+  hosts: k8s,ocp
+  gather_facts: false
+  roles:
+    - install-sysdig-agent

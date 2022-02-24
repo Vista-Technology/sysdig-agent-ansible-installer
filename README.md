@@ -103,49 +103,73 @@ The group_vars directory contains YAML files that have to be named as the groups
 |nia_version|Node Image Analyzer Image tag|
 |nia_api_endpoint|Node Image Analyzer api endpoint|
 |nia_collector_endpoint|Node Image Analyzer collector endpoint|
-
-### Vault
-The vault file will contain a single variable that will be the SysDig account access key for the SaaS backend. 
-
-|Parameter Name| Description|
-|---|---|
 |sysdig_access_key|a variable containing the account access key|
+
+### Sysdig Access Key
+The sysdig access key can be insered in multiple ways. you can define the key in a Vault file that will be encrypted. this is the most secure way to store your password.
+you can also insert the key directly in the group_vars, in this case the key can be also specific for each cluster.
 
 > you can find this parameter in your personal settings in the Sysdig SaaS or in the Agent Installation section
 
-The vault file should look like this: 
+The vault file should look like this before the encryption:
 
 ```yaml
 sysdig_access_key: XXXXXX-YOUR-AGENT-KEY-XXXXXX
 ```
 
-To create it, you can simply run:
-
-```bash
-ansible-vault encrypt_string --name=sysdig_access_key > ./vaultfile.yaml
-```
-
-> you will be asked to insert the ansible vault password and after that will be reading plaintext input from stdin. (ctrl-d to end input, twice if your content does not already have a newline)
-
 #### Vault
 
-You can define a secret.txt where the ansible-vault password will be stored, __make sure that only you can access this file!__
+The vault file will contain a single variable that will be the SysDig account access key for the SaaS backend. 
+
+You can define a secret.txt where the ansible-vault password will be stored, __make sure that only you can access this file!__ or you can simply use the `--ask-vault-password` to prompt the password when necessary.
 
 ```bash
 echo "YOUR_SUPER_SECRET_PASSWORD" > secret.txt
 ```
 
-At this point you can do:
+At this point you can create the `vaultfile.yaml` file:
 
 ```bash
-ansible-vault encrypt_string --vault-password-file=secret.txt --name=sysdig_access_key XXXXXX-YOUR-AGENT-KEY-XXXXXX > vaultfile.yaml
+ansible-vault create vaultfile.yaml --vault-password-file=secret.txt
+```
+
+#### Group Vars
+You can specify in the `group_vars` group file the `sysdig_access_key` simply by defining the variable like in the exampple below: 
+
+```yaml
+# cluster1.yaml.example
+...
+sysdig_access_key: XXXXXX-YOUR-AGENT-KEY-XXXXXX
+...
 ```
 
 ## Run ansible to install sysdig
 At this point you can start the installation process simply by running:
 ```bash
+ansible-playbook sysdig-agent.install.yml
+```
+
+if you use the vault:
+
+```bash
 ansible-playbook sysdig-agent.install.yml --vault-password-file=secret.txt
 ```
+### Dry Run
+> this execution option is reserved to Kubernetes & Openshift **only** also you can not use the vault metod.
+
+You can run the playbook in k8s "*Dry-Run*" fashion, with this option on the specified clusters __will not be executed any command__ directly. Instead, the execution will generate a bundle file for each Cluster. In the case of a K8s Cluster the file will be called k8s-bundle-CLUSTER_NAME.yaml. In the case of an Openshift Cluster, the file will be called openshift-bundle-CLUSTER_NAME.yaml.
+
+
+start the execution of the dry-run with this command:
+```bash
+ansible-playbook sysdig-agent.install.dry-run.yml --extra-vars 'dry_run=True'
+```
+
+in case of OCP Cluster you have tu run manually: 
+```bash
+oc adm policy add-scc-to-user privileged system:serviceaccount:{{ sysdig_agent_namespace }}:sysdig-agent
+```
+
 ## Contacts
 If you have questions or suggestions feel free to contact us:
 

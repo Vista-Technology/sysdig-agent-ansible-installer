@@ -1,6 +1,8 @@
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
+  namespace: {{ sysdig_agent_namespace }}
   name: sysdig-agent
   labels:
     app: sysdig-agent

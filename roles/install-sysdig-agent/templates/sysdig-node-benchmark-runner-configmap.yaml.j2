@@ -1,7 +1,9 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: sysdig-benchmark-runner
+  namespace: {{ sysdig_agent_namespace }}
 data:
   debug: "false"
 

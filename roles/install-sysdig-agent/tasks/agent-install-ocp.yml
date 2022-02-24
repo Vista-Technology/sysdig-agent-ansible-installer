@@ -60,18 +60,26 @@
     state: present
     kubeconfig: "{{ kube_config_path }}"
 
-- name: Configure agent configmap, service and daemonset
+- name: Configure agent configmap
+  kubernetes.core.k8s:
+    resource_definition: "{{ lookup('template', 'sysdig-agent-configmap.yaml.j2')}}"
+    namespace: "{{ sysdig_agent_namespace }}"
+    state: present
+    kubeconfig: "{{ kube_config_path }}"
+  notify:
+    - Restart sysdig-agent pods
+
+- name: Configure agent service and daemonset
   kubernetes.core.k8s:
     resource_definition: "{{ lookup('template', '{{ item }}.yaml.j2')}}"
     namespace: "{{ sysdig_agent_namespace }}"
     state: present
     kubeconfig: "{{ kube_config_path }}"
   loop:
-    - sysdig-agent-configmap
     - sysdig-agent-service
     - sysdig-agent-daemonset-v2
 
-- name: Configure NIA configmap and daemonset
+- name: Configure NIA configmaps
   kubernetes.core.k8s:
     resource_definition: "{{ lookup('template', '{{ item }}.yaml.j2')}}"
     namespace: "{{ sysdig_agent_namespace }}"
@@ -79,7 +87,16 @@
     kubeconfig: "{{ kube_config_path }}"
   loop:
     - sysdig-node-image-analyzer-configmap
-    - sysdig-node-image-analyzer-daemonset
     - sysdig-node-benchmark-runner-configmap
     - sysdig-node-host-analyzer-configmap
+  when: nia_enabled
+  notify:
+    - Restart sysdig NIA pods
+
+- name: Configure NIA daemonset
+  kubernetes.core.k8s:
+    resource_definition: "{{ lookup('template', 'sysdig-node-image-analyzer-daemonset.yaml.j2')}}"
+    namespace: "{{ sysdig_agent_namespace }}"
+    state: present
+    kubeconfig: "{{ kube_config_path }}"
   when: nia_enabled

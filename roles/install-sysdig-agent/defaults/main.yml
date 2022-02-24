@@ -14,3 +14,4 @@ resources_limits_memory: 1024Mi
 # Node Image Analyzer default variables
 nia_enabled: False
 nia_version: latest
+dry_run: false

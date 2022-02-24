@@ -1,0 +1,65 @@
+---
+
+- name: Delete old bundles
+  delegate_to: localhost
+  file:
+    path: "k8s-bundle-{{ group_names[0] }}.yaml"
+    state: absent
+
+- name: Creating new bundle
+  delegate_to: localhost
+  file:
+    path: "k8s-bundle-{{ group_names[0] }}.yaml"
+    state: touch
+
+- name: Create {{ sysdig_agent_namespace }} namespace
+  delegate_to: localhost
+  lineinfile:
+    line: "{{ lookup('template', 'sysdig-agent-namespace.yaml.j2')}}"
+    dest: "k8s-bundle-{{ group_names[0] }}.yaml"
+
+- name: Create Service Account for sysdig agent
+  delegate_to: localhost
+  lineinfile:
+    line: "{{ lookup('template', 'sysdig-agent-serviceaccount.yaml.j2')}}"
+    dest: "k8s-bundle-{{ group_names[0] }}.yaml"
+
+- name: Create ClusterRole for sysdig-agent account
+  delegate_to: localhost
+  lineinfile:
+    line: "{{ lookup('template', 'sysdig-agent-clusterrole.yaml.j2')}}"
+    dest: "k8s-bundle-{{ group_names[0] }}.yaml"
+
+- name: Create ClusterRoleBinding for cluster-reader for sysdig-agent account
+  delegate_to: localhost
+  lineinfile:
+    line: "{{ lookup('template', 'sysdig-agent-clusterrolebinding.yaml.j2')}}"
+    dest: "k8s-bundle-{{ group_names[0] }}.yaml"
+
+- name: Create secret for sysdig-agent
+  delegate_to: localhost
+  lineinfile:
+    line: "{{ lookup('template', 'sysdig-agent-secret.yaml.j2')}}"
+    dest: "k8s-bundle-{{ group_names[0] }}.yaml"
+
+- name: Configure agent configmap, service and daemonset
+  delegate_to: localhost
+  lineinfile:
+    line: "{{ lookup('template', '{{item}}.yaml.j2')}}"
+    dest: "k8s-bundle-{{ group_names[0] }}.yaml"
+  loop:
+    - sysdig-agent-configmap
+    - sysdig-agent-service
+    - sysdig-agent-daemonset-v2
+
+- name: Configure NIA configmap and daemonset
+  delegate_to: localhost
+  lineinfile:
+    line: "{{ lookup('template', '{{item}}.yaml.j2')}}"
+    dest: "k8s-bundle-{{ group_names[0] }}.yaml"
+  loop:
+    - sysdig-node-image-analyzer-configmap
+    - sysdig-node-image-analyzer-daemonset
+    - sysdig-node-benchmark-runner-configmap
+    - sysdig-node-host-analyzer-configmap
+  when: nia_enabled

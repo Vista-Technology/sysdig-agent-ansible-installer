@@ -1,8 +1,10 @@
+---
 # apiVersion: extensions/v1beta1  # If you are in Kubernetes version 1.8 or less please use this line instead of the following one
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: sysdig-node-analyzer
+  namespace: {{ sysdig_agent_namespace }}
   labels:
     app: sysdig-node-analyzer
 spec:

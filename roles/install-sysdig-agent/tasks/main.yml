@@ -1,4 +1,8 @@
 ---
+- name: debug dry_run
+  debug:
+    var: dry_run
+    verbosity: 3 
 
 - name: Install agent as Docker container
   include_tasks: agent-install-dockerd.yml
@@ -6,7 +10,13 @@
 
 - name: Install agent on K8S
   include_tasks: agent-install-k8s.yml
-  when: ('k8s' in group_names)
+  when: ('k8s' in group_names) and
+        (dry_run == False)
+
+- name: Install agent on K8S Dry-Run
+  include_tasks: agent-install-k8s-dry-run.yml
+  when: ('k8s' in group_names) and
+        (dry_run)
 
 - name: Install agent as Systemd daemon
   include_tasks: agent-install-systemd.yml
@@ -14,4 +24,10 @@
 
 - name: Install agent on OCP cluster
   include_tasks: agent-install-ocp.yml
-  when: ('ocp' in group_names)
+  when: ('ocp' in group_names) and
+        (dry_run == False)
+
+- name: Install agent on OCP Cluster Dry-Run
+  include_tasks: agent-install-ocp-dry-run.yml
+  when: ('ocp' in group_names) and
+        (dry_run)

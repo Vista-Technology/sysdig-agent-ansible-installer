@@ -1,7 +1,9 @@
+---
 kind: Service
 apiVersion: v1
 metadata:
   name: sysdig-agent
+  namespace: {{ sysdig_agent_namespace }}
   labels:
     app: sysdig-agent
 spec:

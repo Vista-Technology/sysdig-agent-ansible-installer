@@ -1,2 +1,19 @@
 ---
 # handlers file for install-sysdig-agent
+- name: Restart sysdig-agent pods
+  kubernetes.core.k8s:
+    kind: Pod
+    namespace: "{{ sysdig_agent_namespace }}"
+    state: absent
+    kubeconfig: "{{ kube_config_path }}"
+    label_selectors:
+      - 'app=sysdig-agent'
+
+- name: Restart sysdig NIA pods
+  kubernetes.core.k8s:
+    kind: Pod
+    namespace: "{{ sysdig_agent_namespace }}"
+    state: absent
+    kubeconfig: "{{ kube_config_path }}"
+    label_selectors:
+      - 'app=sysdig-node-analyzer'

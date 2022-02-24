@@ -7,6 +7,7 @@ cluster_name: example-1
 agent_version: latest
 sysdig_agent_namespace: sysdig-agent
 kube_config_path: /home/myansibleuser/.kube/config
+sysdig_access_key: XXXXXX-YOUR-AGENT-KEY-XXXXXX
 # Resources needed are subjective to the actual workload.
 # Please refer to Sysdig Support for more info.
 # See also: https://docs.sysdig.com/en/tuning-sysdig-agent.html
